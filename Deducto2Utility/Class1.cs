@@ -12,7 +12,7 @@ namespace Deducto2Utility
     public class Class1 : MelonMod
     {
         private bool Flying = false;
-        DeductionGameData Cosmetics = null;
+        CosmeticData[] Cosmetics = null;
         Camera[] GameCameras = null;
         GameObject PlayerMovement = null;
         Transform TargetCamera = null; // SPECTATING PLAYER CAMERA
@@ -116,9 +116,12 @@ namespace Deducto2Utility
             Melon<Class1>.Logger.Msg(coloredMessage);
         }
 
-        private void UnlockCosmetics(bool Enabled)
+        private void UnlockCosmetics()
         {
-            Cosmetics.UnlockAllCosmetics = !Enabled;
+            foreach(var Cos in Cosmetics)
+            {
+                Cos.PointCost = 0; // -999999999; You aren't special buddy >:(
+            }
         }
 
         private GameObject GetLocalPlayerCamera()
@@ -248,7 +251,8 @@ namespace Deducto2Utility
             } */ 
             if (Input.GetKeyDown(KeyCode.Keypad1))
             {
-                UnlockCosmetics(!Cosmetics.UnlockAllCosmetics);
+                Cosmetics = GameObject.FindObjectsOfType<CosmeticData>();
+                UnlockCosmetics();
             }
             if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.LeftControl))
             {
@@ -264,8 +268,6 @@ namespace Deducto2Utility
 
             MakeButtonsInteractable(buttonNames);
             SetSliderMinValue(sliderNames);
-
-            Cosmetics = GameObject.FindObjectOfType<DeductionGameData>();
 
         }
     }
