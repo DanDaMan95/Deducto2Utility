@@ -251,7 +251,7 @@ namespace Deducto2Utility
             } */ 
             if (Input.GetKeyDown(KeyCode.Keypad1))
             {
-                Cosmetics = GameObject.FindObjectsOfType<CosmeticData>();
+                Cosmetics = Resources.FindObjectsOfTypeAll<CosmeticData>(); //GameObject.FindObjectsOfType<CosmeticData>();
                 UnlockCosmetics();
             }
             if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.LeftControl))
