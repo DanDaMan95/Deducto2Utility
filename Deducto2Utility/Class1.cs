@@ -11,124 +11,123 @@ namespace Deducto2Utility
 {
     public class Class1 : MelonMod
     {
-        static Slider[] Sliders = null;
-        static GameObject[] Objects = null;
-        static Button[] Kudos = null;
-        static Outlinable[] Outlines = null;
-        static MonoBehaviourPublicTrUnique[] Names = null;
-        static MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique[] GetRooms = null;
-        
+        private void ProcessRooms()
+        {
+            MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique[] rooms = Object.FindObjectsOfType<MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique>();
+            foreach (var room in rooms)
+            {
+                MelonLogger.Msg($"| Host: {room.field_Private_String_0} | Passcode: {room.field_Private_String_1} |");
+            }
+        }
+
+        private void RemoveObjectsByName(string[] objectNames)
+        {
+            GameObject[] objects = Object.FindObjectsOfType<GameObject>();
+            foreach (var gameObject in objects)
+            {
+                string name = gameObject.transform.name;
+                if (ArrayContains(objectNames, name))
+                {
+                    Object.Destroy(gameObject);
+                }
+            }
+        }
+
+        private void AddOutlinesToObjects(string[] objectNames)
+        {
+            GameObject[] objects = Object.FindObjectsOfType<GameObject>();
+            foreach (var gameObject in objects)
+            {
+                string name = gameObject.transform.name;
+                if (ArrayContains(objectNames, name))
+                {
+                    Outlinable existingOutlinable = gameObject.GetComponent<Outlinable>();
+                    if (existingOutlinable == null)
+                    {
+                        gameObject.AddComponent<Outlinable>();
+                    }
+                }
+            }
+        }
+
+        private bool ArrayContains(string[] array, string value)
+        {
+            foreach (var item in array)
+            {
+                if (item == value)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void EnableOutlinesForObjects(string[] objectNames)
+        {
+            Outlinable[] outlines = GameObject.FindObjectsOfType<Outlinable>();
+            foreach (var outline in outlines)
+            {
+                string name = outline.transform.name;
+                if (ArrayContains(objectNames, name))
+                {
+                    outline.AddAllChildRenderersToRenderingList(RenderersAddingMode.SkinnedMeshRenderer);
+                    outline.enabled = true;
+                    outline.OutlineParameters.Color = Color.white;
+                }
+            }
+        }
+
+        private void MakeButtonsInteractable(string[] buttonNames)
+        {
+            Button[] buttons = GameObject.FindObjectsOfType<Button>();
+            foreach (var button in buttons)
+            {
+                string name = button.transform.name;
+                if (ArrayContains(buttonNames, name))
+                {
+                    button.interactable = true;
+                }
+            }
+        }
+
+        private void SetSliderMinValue(string[] sliderNames)
+        {
+            Slider[] sliders = GameObject.FindObjectsOfType<Slider>();
+            foreach (var slider in sliders)
+            {
+                string name = slider.transform.parent.transform.gameObject.name;
+                if (ArrayContains(sliderNames, name))
+                {
+                    slider.minValue = -1;
+                }
+            }
+        }
+
         public override void OnUpdate()
         {
-            bool keyDown1 = Input.GetKeyDown(KeyCode.KeypadPlus);
+            if (Input.GetKeyDown(KeyCode.KeypadPlus))
             {
-                if (keyDown1)
-                {
-                    GetRooms = Object.FindObjectsOfType<MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique>();
-                    foreach (MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique room in GetRooms)
-                    {
-                        MelonLogger.Msg(string.Concat(new string[]
-                        {
-                        "| Host: ",
-                        room.field_Private_String_0,
-                        " | Passcode: ",
-                        room.field_Private_String_1,
-                        " | "
-                        }));
-                    }
-                }
+                ProcessRooms();
             }
-            bool keyDown2 = Input.GetKeyDown(KeyCode.BackQuote);
-            {
-                if (keyDown2)
-                {
-                    Objects = Object.FindObjectsOfType<GameObject>();
-                    foreach (GameObject gameObject in Objects)
-                    {
-                        bool flag1 = gameObject.transform.name == "ParkourSelectionBlocker";
-                        bool flag2 = gameObject.transform.name == "ClearInventory";
-                        if (flag1 || flag2)
-                        {
-                            Object.Destroy(gameObject);
-                        }
-                    }
-                }
-            }
-            bool keyDown = Input.GetKeyDown(KeyCode.Alpha4);
-            {
-                if (keyDown)
-                {
-                    Objects = Object.FindObjectsOfType<GameObject>();
-                    foreach (GameObject gameObject in Objects)
-                    {
-                        bool flag1 = gameObject.transform.name == "CharacterRiggedV7.0";
-                        bool flag2 = gameObject.transform.name == "RagdollPlayer(Clone)";
 
-                        if (flag1 || flag2)
-                        {
-                            Outlinable existingOutlinable = gameObject.GetComponent<Outlinable>();
-                            if (existingOutlinable == null)
-                            {
-                                gameObject.AddComponent<Outlinable>();
-                            }
-                        }
-                    }
-                    Outlines = GameObject.FindObjectsOfType<Outlinable>();
-                    foreach (var lin in Outlines)
-                    {
-                        bool flag1 = lin.transform.name == "CharacterRiggedV7.0";
-                        bool flag2 = lin.transform.name == "RagdollPlayer(Clone)";
-                        if (flag1 || flag2)
-                        {
-                            lin.AddAllChildRenderersToRenderingList(RenderersAddingMode.MeshRenderer);
-                        }
-                    }
-                }
-            }
-            Outlines = GameObject.FindObjectsOfType<Outlinable>();
+            if (Input.GetKeyDown(KeyCode.BackQuote))
             {
-                if (Outlines != null)
-                {
-                    foreach (var lins in Outlines)
-                    {
-                        bool flag1 = lins.transform.name == "RagdollPlayer(Clone)";
-                        bool flag2 = lins.transform.name == "CharacterRiggedV7.0";
-                        if (flag1 || flag2)
-                        {
-                            lins.enabled = true;
-                            lins.outlineParameters.Color = Color.white;
-                        }
-                    }
-                }
+                RemoveObjectsByName(new string[] { "ParkourSelectionBlocker", "ClearInventory" });
             }
-            Kudos = GameObject.FindObjectsOfType<Button>();
+
+            if (Input.GetKeyDown(KeyCode.Alpha4))
             {
-                if (Kudos != null)
-                {
-                    foreach (var kudo in Kudos)
-                    {
-                        bool flag1 = kudo.transform.name == "GivePositiveKarma";
-                        if (flag1)
-                        {
-                            kudo.interactable = true;
-                        }
-                    }
-                }
+                Melon<Class1>.Logger.Msg("Alpha4 was pressed");
+                string[] objectNames = { "CharacterRiggedV7.0", "RagdollPlayer(Clone)" };
+                AddOutlinesToObjects(objectNames);
+                EnableOutlinesForObjects(objectNames);
             }
-            Sliders = GameObject.FindObjectsOfType<Slider>();
-            {
-                if (Sliders != null)
-                {
-                    foreach (var slider in Sliders)
-                    {
-                        bool flag1 = slider.transform.name == "Slider";
-                        if (flag1)
-                        {
-                            slider.minValue = 0;
-                        }
-                    }
-                }
-            }
+
+            string[] buttonNames = { "GivePositiveKarma" };
+            MakeButtonsInteractable(buttonNames);
+
+            string[] sliderNames = { "MaxFPSSlider" };
+            SetSliderMinValue(sliderNames);
         }
     }
 }
