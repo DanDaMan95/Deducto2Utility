@@ -80,7 +80,7 @@ namespace Deducto2Utility
                         bool flag2 = lin.transform.name == "RagdollPlayer(Clone)";
                         if (flag1 || flag2)
                         {
-                            lin.AddAllChildRenderersToRenderingList(RenderersAddingMode.All);
+                            lin.AddAllChildRenderersToRenderingList(RenderersAddingMode.MeshRenderer);
                         }
                     }
                 }
