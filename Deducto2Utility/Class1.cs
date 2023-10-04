@@ -11,6 +11,12 @@ namespace Deducto2Utility
 {
     public class Class1 : MelonMod
     {
+        private bool Flying = false;
+        DeductionGameData Cosmetics = null;
+        Camera[] GameCameras = null;
+        GameObject PlayerMovement = null;
+        Transform TargetCamera = null; // SPECTATING PLAYER CAMERA
+        GameObject PlayerCharacter = null; // SPECTATING PLAYER CHARACTERRIGGEDV7.0
         private void ProcessRooms()
         {
             MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique[] rooms = Object.FindObjectsOfType<MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique>();
@@ -103,6 +109,113 @@ namespace Deducto2Utility
             }
         }
 
+        private void EasyLog(string message, string colorCode)
+        {
+            string coloredMessage = $"\u001b[{colorCode}m{message}\u001b[0m"; // Have fun Mr.Dirty - OwO
+            Melon<Class1>.Logger.Msg(coloredMessage);
+        }
+
+        private void UnlockCosmetics(bool Enabled)
+        {
+            Cosmetics.UnlockAllCosmetics = !Enabled;
+        }
+
+        private GameObject GetLocalPlayerCamera()
+        {
+            GameCameras = GameObject.FindObjectsOfType<Camera>();
+            //Camera ReturnCamera = null;
+            foreach (var Camera in GameCameras)
+            {
+                EasyLog($"{Camera.name} was found", "32");
+                if (Camera.enabled)
+                {
+                    PlayerMovement = Camera.transform.parent.parent.parent.gameObject;
+                    //ReturnCamera = Camera;
+                }
+            }
+            return PlayerMovement;
+        }
+
+        private void ProcessFlying(bool Enabled)
+        {
+            PlayerMovement = GetLocalPlayerCamera();
+            EasyLog(PlayerMovement.name + " Found Player","32");
+            Flying = !Flying;
+            if (Flying) { EasyLog("Flying was enabled.", "32"); } else { EasyLog("Flying was disabled.", "31"); }
+        }
+
+        [System.Obsolete]
+        public override void OnApplicationStart()
+        {
+            string[] buttonNames = { "GivePositiveKarma" };
+            string[] sliderNames = { "MaxFPSSlider" };
+
+            MakeButtonsInteractable(buttonNames);
+            SetSliderMinValue(sliderNames);
+
+            /* DEDUCTO DECLARES */
+
+            PlayerMovement = GetLocalPlayerCamera();
+            Cosmetics = GameObject.FindObjectOfType<DeductionGameData>();
+            EasyLog(@"
+                ________             .___             __         ________  ____ ___   __  .__.__  .__  __          
+                \______ \   ____   __| _/_ __   _____/  |_  ____ \_____  \|    |   \_/  |_|__|  | |__|/  |_ ___.__.
+                 |    |  \_/ __ \ / __ |  |  \_/ ___\   __\/  _ \ /  ____/|    |   /\   __\  |  | |  \   __<   |  |
+                 |    `   \  ___// /_/ |  |  /\  \___|  | (  <_> )       \|    |  /  |  | |  |  |_|  ||  |  \___  |
+                /_______  /\___  >____ |____/  \___  >__|  \____/\_______ \______/   |__| |__|____/__||__|  / ____|
+                        \/     \/     \/           \/                    \/                                 \/     
+                                ", "31");
+            EasyLog(@"
+
+                                    [BackQuote] -> Reset Parkour Level Changing Buttons
+                                    [Alpha4] -> Enable Wallhacks ( OwO rawr x3 )
+                                    [Keypad1] -> Unlock All Cosmetics
+                                    [Mouse0 + LeftControl] -> Spectate Player ( Click on player )
+                                    [F1] -> Reset Spectate Player
+                                    [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
+                                    [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
+
+", "32");
+
+        }
+        
+        private void DisableSpectate()
+        {
+            if (TargetCamera && PlayerCharacter != null)
+            {
+                TargetCamera.gameObject.SetActive(false);
+                PlayerCharacter.SetActive(true);
+            }
+        }
+
+        private void SpectateCharacter()
+        {
+            PlayerMovement = GetLocalPlayerCamera();
+            Ray ray = Camera.main.ScreenPointToRay(new Vector2(Input.mousePosition.x, Input.mousePosition.y));
+            RaycastHit hit;
+            float distance = 100f;
+
+            if (Physics.Raycast(ray, out hit, distance))
+            {
+                Debug.DrawLine(ray.origin, hit.point);
+                GameObject PlayerTarget = hit.collider.transform.root.gameObject;
+                EasyLog("Clicked on: " + PlayerTarget.name, "32");
+
+                TargetCamera = PlayerTarget.transform.Find("CameraRoot/CameraControls/Camera");
+                PlayerCharacter = PlayerTarget.transform.Find("PlayerModelV2/CharacterRiggedV7.0").gameObject;
+                if (PlayerCharacter == null) { PlayerCharacter = PlayerTarget.transform.Find("PlayerModel(Clone)/CharacterRiggedV7.0").gameObject; }
+                if (TargetCamera != null)
+                {
+                    TargetCamera.gameObject.SetActive(true);
+                    PlayerCharacter.SetActive(false);
+                }
+                else
+                {
+                    Debug.LogError("CameraControls not found on: " + PlayerTarget.name);
+                }
+            }
+        }
+
         public override void OnUpdate()
         {
             if (Input.GetKeyDown(KeyCode.KeypadPlus))
@@ -117,17 +230,36 @@ namespace Deducto2Utility
 
             if (Input.GetKeyDown(KeyCode.Alpha4))
             {
-                Melon<Class1>.Logger.Msg("Alpha4 was pressed");
                 string[] objectNames = { "CharacterRiggedV7.0", "RagdollPlayer(Clone)" };
                 AddOutlinesToObjects(objectNames);
                 EnableOutlinesForObjects(objectNames);
             }
 
-            string[] buttonNames = { "GivePositiveKarma" };
-            MakeButtonsInteractable(buttonNames);
+            if (Input.GetKeyDown(KeyCode.CapsLock))
+            {
+                ProcessFlying(!Flying);
+            }
+            /* if (Flying)
+            {
+                if (Input.GetKeyDown(KeyCode.UpArrow))
+                {
 
-            string[] sliderNames = { "MaxFPSSlider" };
-            SetSliderMinValue(sliderNames);
+                    PlayerMovement.transform.localPosition += new Vector3(0,5,0);
+                    EasyLog($"Going up! {PlayerMovement.name}","32");
+                }
+            } */ 
+            if (Input.GetKeyDown(KeyCode.Keypad1))
+            {
+                UnlockCosmetics(!Cosmetics.UnlockAllCosmetics);
+            }
+            if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.LeftControl))
+            {
+                SpectateCharacter();
+            }
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                DisableSpectate();
+            }
         }
     }
 }
