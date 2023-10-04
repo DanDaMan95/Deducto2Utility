@@ -17,6 +17,7 @@ namespace Deducto2Utility
         GameObject PlayerMovement = null;
         Transform TargetCamera = null; // SPECTATING PLAYER CAMERA
         GameObject PlayerCharacter = null; // SPECTATING PLAYER CHARACTERRIGGEDV7.0
+        bool DeclaresInit = false;
         private void ProcessRooms()
         {
             MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique[] rooms = Object.FindObjectsOfType<MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique>();
@@ -139,7 +140,6 @@ namespace Deducto2Utility
         private void ProcessFlying(bool Enabled)
         {
             PlayerMovement = GetLocalPlayerCamera();
-            EasyLog(PlayerMovement.name + " Found Player","32");
             Flying = !Flying;
             if (Flying) { EasyLog("Flying was enabled.", "32"); } else { EasyLog("Flying was disabled.", "31"); }
         }
@@ -147,16 +147,10 @@ namespace Deducto2Utility
         [System.Obsolete]
         public override void OnApplicationStart()
         {
-            string[] buttonNames = { "GivePositiveKarma" };
-            string[] sliderNames = { "MaxFPSSlider" };
-
-            MakeButtonsInteractable(buttonNames);
-            SetSliderMinValue(sliderNames);
 
             /* DEDUCTO DECLARES */
 
             PlayerMovement = GetLocalPlayerCamera();
-            Cosmetics = GameObject.FindObjectOfType<DeductionGameData>();
             EasyLog(@"
                 ________             .___             __         ________  ____ ___   __  .__.__  .__  __          
                 \______ \   ____   __| _/_ __   _____/  |_  ____ \_____  \|    |   \_/  |_|__|  | |__|/  |_ ___.__.
@@ -186,6 +180,11 @@ namespace Deducto2Utility
                 TargetCamera.gameObject.SetActive(false);
                 PlayerCharacter.SetActive(true);
             }
+            else
+            {
+                PlayerMovement = GetLocalPlayerCamera();
+                PlayerMovement.transform.Find("CameraRoot/CameraControls/Camera").gameObject.SetActive(true);
+            }
         }
 
         private void SpectateCharacter()
@@ -199,7 +198,6 @@ namespace Deducto2Utility
             {
                 Debug.DrawLine(ray.origin, hit.point);
                 GameObject PlayerTarget = hit.collider.transform.root.gameObject;
-                EasyLog("Clicked on: " + PlayerTarget.name, "32");
 
                 TargetCamera = PlayerTarget.transform.Find("CameraRoot/CameraControls/Camera");
                 PlayerCharacter = PlayerTarget.transform.Find("PlayerModelV2/CharacterRiggedV7.0").gameObject;
@@ -260,6 +258,15 @@ namespace Deducto2Utility
             {
                 DisableSpectate();
             }
+
+            string[] buttonNames = { "GivePositiveKarma" };
+            string[] sliderNames = { "MaxFPSSlider" };
+
+            MakeButtonsInteractable(buttonNames);
+            SetSliderMinValue(sliderNames);
+
+            Cosmetics = GameObject.FindObjectOfType<DeductionGameData>();
+
         }
     }
 }
