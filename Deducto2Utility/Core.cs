@@ -278,15 +278,20 @@ namespace Deducto2Utility
 
         private void OPWeapons()
         {
+            GameItemData = Resources.FindObjectsOfTypeAll<ItemData>();
             foreach (var Item in GameItemData)
             {
                 if (Item.name == "SketchMarkerData" && EarrapeItem)
                 {
+                    // EasyLog(Item.name + " was found", EasyLogColors.Cyan);
                     GameAudioClips = Resources.FindObjectsOfTypeAll<AudioClip>();
                     foreach(var Audio in GameAudioClips)
                     {
-                        if (Audio.name == "110867-Male_car_start_engine_rev_-sfx-cartoon-Nightingale_Music_Productions-14015")
+                        // EasyLog(Audio.name + " was found",EasyLogColors.Cyan);
+                        if (Audio.name.Contains("EXPLOSION"))
                         {
+                            Item.RateOfUse = 0;
+                            Item.SoundEffectVolume = 999;
                             Item.UseSoundEffects.Clear();
                             Item.UseSoundEffects.Add(Audio);
                             Item.UseSoundEffects.Add(Audio);
@@ -383,7 +388,6 @@ namespace Deducto2Utility
 
             if (Input.GetKeyDown(KeyCode.Keypad7))
             {
-                GameItemData = Resources.FindObjectsOfTypeAll<ItemData>();
                 OPWeapons();
             }
 
