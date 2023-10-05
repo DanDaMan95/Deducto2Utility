@@ -153,6 +153,7 @@ namespace Deducto2Utility
                 }
             }
         }
+
         private void EasyLog(string message, EasyLogColors color)
         {
             int colorCode = (int)color;
@@ -324,7 +325,7 @@ namespace Deducto2Utility
             if (Input.GetKeyDown(KeyCode.Keypad1) && !UnlockedAllCosmetics)
             {
                 EasyLog("Unlocked All Cosmetics",EasyLogColors.Green);
-                GameData = Resources.FindObjectsOfTypeAll<DeductionGameData>(); //GameObject.FindObjectsOfType<CosmeticData>();
+                GameData = Resources.FindObjectsOfTypeAll<DeductionGameData>();
                 UnlockCosmetics();
             }
             if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.LeftControl))
