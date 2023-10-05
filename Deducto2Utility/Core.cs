@@ -7,10 +7,10 @@ using Il2CppEPOOutline;
 using Il2Cpp;
 using System;
 
-[assembly: MelonInfo(typeof(Deducto2Utility.Class1), "Deducto2Utility", "1.9.0", "Mr. Dirty")]
+[assembly: MelonInfo(typeof(Deducto2Utility.Core), "Deducto2Utility", "1.9.0", "Mr. Dirty")]
 namespace Deducto2Utility
 {
-    public class Class1 : MelonMod
+    public class Core : MelonMod
     {
 
         DeductionGameData[] GameData = null;
@@ -19,6 +19,7 @@ namespace Deducto2Utility
         Transform TargetCamera = null;      /* Spectator ( Your target )*/
         GameObject PlayerCharacter = null;  /* Local Player Spectating */
         RoleData[] GameRoleData = null;
+        ItemData[] GameItemData = null;
 
         /* ENUMS */
 
@@ -41,6 +42,18 @@ namespace Deducto2Utility
 
         private bool Flying = false;
 
+        public class WeaponData
+        {
+            public int Range { get; set; }
+            public int RateOfUse { get; set; }
+
+            public WeaponData(int range, int rateOfUse)
+            {
+                Range = range;
+                RateOfUse = rateOfUse;
+            }
+        }
+
         private Dictionary<string, string> RoleStrings = new Dictionary<string, string>
         {
             { "ImposterData", "Kill all Co-workers, also press '4' on your keyboard. Thank me later." },
@@ -51,6 +64,15 @@ namespace Deducto2Utility
             { "SupervisorData", "You wote fow the pwecious pweople. It's aww about Women's Suffewage !! OwO UwU ^w^" },
             { "Patrick", "What's up!!"}
         };
+
+        private Dictionary<string, WeaponData> Weapons = new Dictionary<string, WeaponData>
+        {
+            { "Knife01Data", new WeaponData(0, 0) },
+            { "NailGunData", new WeaponData(0, 0) },
+            { "Pistol01Data", new WeaponData(0, 0) },
+            { "StaplerData", new WeaponData(0, 0) },
+        };
+
 
         /* -------- */
 
@@ -158,7 +180,7 @@ namespace Deducto2Utility
         {
             int colorCode = (int)color;
             string coloredMessage = $"\u001b[{colorCode}m{message}\u001b[0m"; // Apply ANSI color code
-            Melon<Class1>.Logger.Msg(coloredMessage);
+            Melon<Core>.Logger.Msg(coloredMessage);
         }
 
         private void UnlockCosmetics()
@@ -175,25 +197,9 @@ namespace Deducto2Utility
 
         }
 
-        private GameObject GetLocalPlayerCamera()
-        {
-            GameCameras = GameObject.FindObjectsOfType<Camera>();
-            //Camera ReturnCamera = null;
-            foreach (var Camera in GameCameras)
-            {
-                EasyLog($"{Camera.name} was found", EasyLogColors.Green);
-                if (Camera.enabled)
-                {
-                    PlayerMovement = Camera.transform.parent.parent.parent.gameObject;
-                    //ReturnCamera = Camera;
-                }
-            }
-            return PlayerMovement;
-        }
-
         private void ProcessFlying(bool Enabled)
         {
-            PlayerMovement = GetLocalPlayerCamera();
+            PlayerMovement = Utility.GetLocalPlayerCamera();
             Flying = !Flying;
             if (Flying) { EasyLog("Flying was enabled.", EasyLogColors.Green); } else { EasyLog("Flying was disabled.", EasyLogColors.Red); }
         }
@@ -204,7 +210,7 @@ namespace Deducto2Utility
 
             /* DEDUCTO DECLARES */
 
-            PlayerMovement = GetLocalPlayerCamera();
+            PlayerMovement = Utility.GetLocalPlayerCamera();
             EasyLog(@"
                 ________             .___             __         ________  ____ ___   __  .__.__  .__  __          
                 \______ \   ____   __| _/_ __   _____/  |_  ____ \_____  \|    |   \_/  |_|__|  | |__|/  |_ ___.__.
@@ -236,14 +242,14 @@ namespace Deducto2Utility
             }
             else
             {
-                PlayerMovement = GetLocalPlayerCamera();
+                PlayerMovement = Utility.GetLocalPlayerCamera();
                 PlayerMovement.transform.Find("CameraRoot/CameraControls/Camera").gameObject.SetActive(true);
             }
         }
 
         private void SpectateCharacter()
         {
-            PlayerMovement = GetLocalPlayerCamera();
+            PlayerMovement = Utility.GetLocalPlayerCamera();
             Ray ray = Camera.main.ScreenPointToRay(new Vector2(Input.mousePosition.x, Input.mousePosition.y));
             RaycastHit hit;
             float distance = 100f;
@@ -264,6 +270,25 @@ namespace Deducto2Utility
                 else
                 {
                     Debug.LogError("CameraControls not found on: " + PlayerTarget.name);
+                }
+            }
+        }
+
+        private void OPWeapons()
+        {
+            foreach (var Item in GameItemData)
+            {
+                if (Weapons.ContainsKey(Item.name))
+                {
+                    int RangeOfWeapon = Weapons[Item.name].Range;
+                    int RateOfUse = Weapons[Item.name].RateOfUse;
+
+                    Item.RateOfUse = RateOfUse;
+                    Item.Range = RangeOfWeapon;
+                }
+                else
+                {
+                    // How did this even happen
                 }
             }
         }
@@ -335,6 +360,12 @@ namespace Deducto2Utility
             if (Input.GetKeyDown(KeyCode.F1))
             {
                 DisableSpectate();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad7))
+            {
+                GameItemData = Resources.FindObjectsOfTypeAll<ItemData>();
+                OPWeapons();
             }
 
             if (!SetMinFPSSlider)
