@@ -8,6 +8,7 @@ using System.Collections;
 using UnityEngine.UI;
 using Deducto2Utility;
 using static Deducto2Utility.Stuff;
+using static Deducto2Utility.Dicts;
 
 [assembly: MelonInfo(typeof(Deducto2Utility.Core), "Deducto2Utility", "1.9.0", "Mr. Dirty")]
 namespace Deducto2Utility
@@ -27,37 +28,6 @@ namespace Deducto2Utility
         /* DECLARES */
 
         private bool Flying = false;
-
-        public class WeaponData
-        {
-            public int Range { get; set; }
-            public int RateOfUse { get; set; }
-
-            public WeaponData(int range, int rateOfUse)
-            {
-                Range = range;
-                RateOfUse = rateOfUse;
-            }
-        }
-
-        private Dictionary<string, string> RoleStrings = new Dictionary<string, string>
-        {
-            { "ImposterData", "Kill all Co-workers, also press '4' on your keyboard. Thank me later." },
-            { "CoworkerData", "I am pretty sure anyone else using this cheat is walling, Become friends with them." },
-            { "InfectedData", "Haha, L + Bozo + Ratio, Anyway, go touch others or something." },
-            { "JudgeData", "JUDGE JUDY ??!!! Don't be rude okay...?" },
-            { "SecurityData", "Kill literally anyone but you'll be voted out. Kill Imposters" },
-            { "SupervisorData", "You wote fow the pwecious pweople. It's aww about Women's Suffewage !! OwO UwU ^w^" },
-            { "Patrick", "What's up!!"}
-        };
-
-        private Dictionary<string, WeaponData> Weapons = new Dictionary<string, WeaponData>
-        {
-            { "Knife01Data", new WeaponData(int.MaxValue, 0) },
-            { "NailGunData", new WeaponData(int.MaxValue, 0) },
-            { "Pistol01Data", new WeaponData(int.MaxValue, 0) },
-            { "StaplerData", new WeaponData(int.MaxValue, 0) },
-        };
 
         /* -------- */
 
@@ -146,16 +116,26 @@ namespace Deducto2Utility
             }
         }
 
-        private void SetSliderMinValue(string[] sliderNames)
+        private void SetSliderCustomValues(string[] sliderNames)
         {
             Slider[] sliders = GameObject.FindObjectsOfType<Slider>();
             foreach (var slider in sliders)
             {
-                string name = slider.transform.parent.transform.gameObject.name;
+                string name = slider.transform.parent.gameObject.name;
                 if (ArrayContains(sliderNames, name))
                 {
-                    slider.minValue = -1;
-                    SetMinFPSSlider = true;
+                    if (Sliders.TryGetValue(name, out SliderInfo sliderInfo))
+                    {
+                        if (sliderInfo.IsMax)
+                        {
+                            slider.maxValue = sliderInfo.Value;
+                        }
+                        else
+                        {
+                            slider.minValue = sliderInfo.Value;
+                        }
+                        SetMinFPSSlider = true;
+                    }
                 }
             }
         }
@@ -369,8 +349,8 @@ namespace Deducto2Utility
 
             if (!SetMinFPSSlider)
             {
-                string[] sliderNames = { "MaxFPSSlider" };
-                SetSliderMinValue(sliderNames);
+                string[] sliderNames = { "MaxFPSSlider", "Slider_01" };
+                SetSliderCustomValues(sliderNames);
                 FunnyQuotes();
             }
 
