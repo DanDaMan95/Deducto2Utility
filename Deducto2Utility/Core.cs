@@ -1,11 +1,10 @@
-﻿using System.Collections;
+﻿using Il2Cpp;
+using Il2CppEPOOutline;
+using MelonLoader;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using MelonLoader;
 using UnityEngine.UI;
-using Il2CppEPOOutline;
-using Il2Cpp;
-using System;
 
 [assembly: MelonInfo(typeof(Deducto2Utility.Core), "Deducto2Utility", "1.9.0", "Mr. Dirty")]
 namespace Deducto2Utility
@@ -20,6 +19,8 @@ namespace Deducto2Utility
         GameObject PlayerCharacter = null;  /* Local Player Spectating */
         RoleData[] GameRoleData = null;
         ItemData[] GameItemData = null;
+        AudioClip[] GameAudioClips = null;
+        bool EarrapeItem = false;
 
         /* ENUMS */
 
@@ -279,6 +280,24 @@ namespace Deducto2Utility
         {
             foreach (var Item in GameItemData)
             {
+                if (Item.name == "SketchMarkerData" && EarrapeItem)
+                {
+                    GameAudioClips = Resources.FindObjectsOfTypeAll<AudioClip>();
+                    foreach(var Audio in GameAudioClips)
+                    {
+                        if (Audio.name == "110867-Male_car_start_engine_rev_-sfx-cartoon-Nightingale_Music_Productions-14015")
+                        {
+                            Item.UseSoundEffects.Clear();
+                            Item.UseSoundEffects.Add(Audio);
+                            Item.UseSoundEffects.Add(Audio);
+                            Item.UseSoundEffects.Add(Audio);
+                            Item.UseSoundEffects.Add(Audio);
+                            Item.UseSoundEffects.Add(Audio);
+                            Item.UseSoundEffects.Add(Audio);
+                            Item.UseSoundEffects.Add(Audio);
+                        }
+                    }
+                }
                 if (Weapons.ContainsKey(Item.name))
                 {
                     int RangeOfWeapon = Weapons[Item.name].Range;
@@ -378,6 +397,11 @@ namespace Deducto2Utility
                 string[] sliderNames = { "MaxFPSSlider" };
                 SetSliderMinValue(sliderNames);
                 FunnyQuotes();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad2))
+            {
+                EarrapeItem = !EarrapeItem;
             }
 
         }
