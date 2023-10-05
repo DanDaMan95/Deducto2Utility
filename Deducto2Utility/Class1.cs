@@ -5,22 +5,65 @@ using MelonLoader;
 using UnityEngine.UI;
 using Il2CppEPOOutline;
 using Il2Cpp;
+using System;
 
 [assembly: MelonInfo(typeof(Deducto2Utility.Class1), "Deducto2Utility", "1.9.0", "Mr. Dirty")]
 namespace Deducto2Utility
 {
     public class Class1 : MelonMod
     {
-        private bool Flying = false;
-        CosmeticData[] Cosmetics = null;
+
+        DeductionGameData[] GameData = null;
         Camera[] GameCameras = null;
-        GameObject PlayerMovement = null;
-        Transform TargetCamera = null; // SPECTATING PLAYER CAMERA
-        GameObject PlayerCharacter = null; // SPECTATING PLAYER CHARACTERRIGGEDV7.0
-        bool DeclaresInit = false;
+        GameObject PlayerMovement = null;   /* Local Player */
+        Transform TargetCamera = null;      /* Spectator ( Your target )*/
+        GameObject PlayerCharacter = null;  /* Local Player Spectating */
+        RoleData[] GameRoleData = null;
+
+        /* ENUMS */
+
+        private enum EasyLogColors
+        {
+            Reset = 0,
+            Black = 30,
+            Red = 31,
+            Green = 32,
+            Yellow = 33,
+            Blue = 34,
+            Magenta = 35,
+            Cyan = 36,
+            White = 37
+        }
+
+        /* ----- */
+
+        /* DECLARES */
+
+        private bool Flying = false;
+
+        private Dictionary<string, string> RoleStrings = new Dictionary<string, string>
+        {
+            { "ImposterData", "Kill all Co-workers, also press '4' on your keyboard. Thank me later." },
+            { "CoworkerData", "I am pretty sure anyone else using this cheat is walling, Become friends with them." },
+            { "InfectedData", "Haha, L + Bozo + Ratio, Anyway, go touch others or something." },
+            { "JudgeData", "JUDGE JUDY ??!!! Don't be rude okay...?" },
+            { "SecurityData", "Kill literally anyone but you'll be voted out. Kill Imposters" },
+            { "SupervisorData", "You wote fow the pwecious pweople. It's aww about Women's Suffewage !! OwO UwU ^w^" },
+            { "Patrick", "What's up!!"}
+        };
+
+        /* -------- */
+
+        /* ONE TIME CHECKS */
+
+        bool UnlockedAllCosmetics = false;
+        bool SetMinFPSSlider = false;
+
+        /* --------------- */
+
         private void ProcessRooms()
         {
-            MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique[] rooms = Object.FindObjectsOfType<MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique>();
+            MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique[] rooms = GameObject.FindObjectsOfType<MonoBehaviourPublicTeGaTeBuGaRoBuroGaTMUnique>();
             foreach (var room in rooms)
             {
                 MelonLogger.Msg($"| Host: {room.field_Private_String_0} | Passcode: {room.field_Private_String_1} |");
@@ -29,20 +72,20 @@ namespace Deducto2Utility
 
         private void RemoveObjectsByName(string[] objectNames)
         {
-            GameObject[] objects = Object.FindObjectsOfType<GameObject>();
+            GameObject[] objects = GameObject.FindObjectsOfType<GameObject>();
             foreach (var gameObject in objects)
             {
                 string name = gameObject.transform.name;
                 if (ArrayContains(objectNames, name))
                 {
-                    Object.Destroy(gameObject);
+                    GameObject.Destroy(gameObject);
                 }
             }
         }
 
         private void AddOutlinesToObjects(string[] objectNames)
         {
-            GameObject[] objects = Object.FindObjectsOfType<GameObject>();
+            GameObject[] objects = GameObject.FindObjectsOfType<GameObject>();
             foreach (var gameObject in objects)
             {
                 string name = gameObject.transform.name;
@@ -106,22 +149,29 @@ namespace Deducto2Utility
                 if (ArrayContains(sliderNames, name))
                 {
                     slider.minValue = -1;
+                    SetMinFPSSlider = true;
                 }
             }
         }
-
-        private void EasyLog(string message, string colorCode)
+        private void EasyLog(string message, EasyLogColors color)
         {
-            string coloredMessage = $"\u001b[{colorCode}m{message}\u001b[0m"; // Have fun Mr.Dirty - OwO
+            int colorCode = (int)color;
+            string coloredMessage = $"\u001b[{colorCode}m{message}\u001b[0m"; // Apply ANSI color code
             Melon<Class1>.Logger.Msg(coloredMessage);
         }
 
         private void UnlockCosmetics()
         {
-            foreach(var Cos in Cosmetics)
+            GameData[0].UnlockAllCosmetics = true;
+            UnlockedAllCosmetics = true;
+
+            /*foreach(var Cos in Cosmetics)
             {
                 Cos.PointCost = 0; // -999999999; You aren't special buddy >:(
-            }
+                // Cos.SpecialityUnlock = true; // meh
+                Cos.UnlockAllCosmetics = true;
+            }*/
+
         }
 
         private GameObject GetLocalPlayerCamera()
@@ -130,7 +180,7 @@ namespace Deducto2Utility
             //Camera ReturnCamera = null;
             foreach (var Camera in GameCameras)
             {
-                EasyLog($"{Camera.name} was found", "32");
+                EasyLog($"{Camera.name} was found", EasyLogColors.Green);
                 if (Camera.enabled)
                 {
                     PlayerMovement = Camera.transform.parent.parent.parent.gameObject;
@@ -144,10 +194,10 @@ namespace Deducto2Utility
         {
             PlayerMovement = GetLocalPlayerCamera();
             Flying = !Flying;
-            if (Flying) { EasyLog("Flying was enabled.", "32"); } else { EasyLog("Flying was disabled.", "31"); }
+            if (Flying) { EasyLog("Flying was enabled.", EasyLogColors.Green); } else { EasyLog("Flying was disabled.", EasyLogColors.Red); }
         }
 
-        [System.Obsolete]
+        [Obsolete]
         public override void OnApplicationStart()
         {
 
@@ -161,7 +211,7 @@ namespace Deducto2Utility
                  |    `   \  ___// /_/ |  |  /\  \___|  | (  <_> )       \|    |  /  |  | |  |  |_|  ||  |  \___  |
                 /_______  /\___  >____ |____/  \___  >__|  \____/\_______ \______/   |__| |__|____/__||__|  / ____|
                         \/     \/     \/           \/                    \/                                 \/     
-                                ", "31");
+                                ", EasyLogColors.Red);
             EasyLog(@"
 
                                     [BackQuote] -> Reset Parkour Level Changing Buttons
@@ -172,7 +222,7 @@ namespace Deducto2Utility
                                     [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
                                     [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
 
-", "32");
+", EasyLogColors.Green);
 
         }
         
@@ -217,8 +267,30 @@ namespace Deducto2Utility
             }
         }
 
+        private void FunnyQuotes()
+        {
+            GameRoleData = Resources.FindObjectsOfTypeAll<RoleData>();
+            foreach (var Role in GameRoleData)
+            {
+                if (RoleStrings.ContainsKey(Role.name))
+                {
+                    string GetDescription = RoleStrings[Role.name];
+                    Role.Description = GetDescription;
+                }
+                else
+                {
+                    // How did this even happen
+                }
+            }
+        }
+
+
         public override void OnUpdate()
         {
+
+            //string[] buttonNames = { "GivePositiveKarma" };
+            //MakeButtonsInteractable(buttonNames);
+
             if (Input.GetKeyDown(KeyCode.KeypadPlus))
             {
                 ProcessRooms();
@@ -246,12 +318,13 @@ namespace Deducto2Utility
                 {
 
                     PlayerMovement.transform.localPosition += new Vector3(0,5,0);
-                    EasyLog($"Going up! {PlayerMovement.name}","32");
+                    EasyLog($"Going up! {PlayerMovement.name}",EasyLogColors.Green);
                 }
             } */ 
-            if (Input.GetKeyDown(KeyCode.Keypad1))
+            if (Input.GetKeyDown(KeyCode.Keypad1) && !UnlockedAllCosmetics)
             {
-                Cosmetics = Resources.FindObjectsOfTypeAll<CosmeticData>(); //GameObject.FindObjectsOfType<CosmeticData>();
+                EasyLog("Unlocked All Cosmetics",EasyLogColors.Green);
+                GameData = Resources.FindObjectsOfTypeAll<DeductionGameData>(); //GameObject.FindObjectsOfType<CosmeticData>();
                 UnlockCosmetics();
             }
             if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.LeftControl))
@@ -263,11 +336,13 @@ namespace Deducto2Utility
                 DisableSpectate();
             }
 
-            string[] buttonNames = { "GivePositiveKarma" };
-            string[] sliderNames = { "MaxFPSSlider" };
+            if (!SetMinFPSSlider)
+            {
+                string[] sliderNames = { "MaxFPSSlider" };
+                SetSliderMinValue(sliderNames);
+            }
 
-            MakeButtonsInteractable(buttonNames);
-            SetSliderMinValue(sliderNames);
+            FunnyQuotes();
 
         }
     }
