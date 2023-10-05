@@ -4,7 +4,10 @@ using MelonLoader;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 using UnityEngine.UI;
+using Deducto2Utility;
+using static Deducto2Utility.Stuff;
 
 [assembly: MelonInfo(typeof(Deducto2Utility.Core), "Deducto2Utility", "1.9.0", "Mr. Dirty")]
 namespace Deducto2Utility
@@ -13,7 +16,6 @@ namespace Deducto2Utility
     {
 
         DeductionGameData[] GameData = null;
-        Camera[] GameCameras = null;
         GameObject PlayerMovement = null;   /* Local Player */
         Transform TargetCamera = null;      /* Spectator ( Your target )*/
         GameObject PlayerCharacter = null;  /* Local Player Spectating */
@@ -21,23 +23,6 @@ namespace Deducto2Utility
         ItemData[] GameItemData = null;
         AudioClip[] GameAudioClips = null;
         bool EarrapeItem = false;
-
-        /* ENUMS */
-
-        private enum EasyLogColors
-        {
-            Reset = 0,
-            Black = 30,
-            Red = 31,
-            Green = 32,
-            Yellow = 33,
-            Blue = 34,
-            Magenta = 35,
-            Cyan = 36,
-            White = 37
-        }
-
-        /* ----- */
 
         /* DECLARES */
 
@@ -78,7 +63,6 @@ namespace Deducto2Utility
 
         /* ONE TIME CHECKS */
 
-        bool UnlockedAllCosmetics = false;
         bool SetMinFPSSlider = false;
 
         /* --------------- */
@@ -176,30 +160,15 @@ namespace Deducto2Utility
             }
         }
 
-        private void EasyLog(string message, EasyLogColors color)
-        {
-            int colorCode = (int)color;
-            string coloredMessage = $"\u001b[{colorCode}m{message}\u001b[0m"; // Apply ANSI color code
-            Melon<Core>.Logger.Msg(coloredMessage);
-        }
-
         private void UnlockCosmetics()
         {
             GameData[0].UnlockAllCosmetics = true;
-            UnlockedAllCosmetics = true;
-
-            /*foreach(var Cos in Cosmetics)
-            {
-                Cos.PointCost = 0; // -999999999; You aren't special buddy >:(
-                // Cos.SpecialityUnlock = true; // meh
-                Cos.UnlockAllCosmetics = true;
-            }*/
-
+            EasyLog("UnlockAllCosmetics: true", EasyLogColors.Green);
         }
 
         private void ProcessFlying(bool Enabled)
         {
-            PlayerMovement = Utility.GetLocalPlayerCamera();
+            PlayerMovement = Utility.GetLocalPlayer();
             Flying = !Flying;
             if (Flying) { EasyLog("Flying was enabled.", EasyLogColors.Green); } else { EasyLog("Flying was disabled.", EasyLogColors.Red); }
         }
@@ -207,10 +176,7 @@ namespace Deducto2Utility
         [Obsolete]
         public override void OnApplicationStart()
         {
-
-            /* DEDUCTO DECLARES */
-
-            PlayerMovement = Utility.GetLocalPlayerCamera();
+            PlayerMovement = Utility.GetLocalPlayer();
             EasyLog(@"
         ________             .___             __         ________  ____ ___   __  .__.__  .__  __          
         \______ \   ____   __| _/_ __   _____/  |_  ____ \_____  \|    |   \_/  |_|__|  | |__|/  |_ ___.__.
@@ -234,12 +200,19 @@ namespace Deducto2Utility
 
 ", EasyLogColors.Green);
 
-            EasyLog("Unlocked All Cosmetics", EasyLogColors.Green);
-            GameData = Resources.FindObjectsOfTypeAll<DeductionGameData>();
-            UnlockCosmetics();
-
+            MelonCoroutines.Start(WaitForGameData());
         }
-        
+
+        private IEnumerator WaitForGameData()
+        {
+            while (GameData == null || GameData.Length == 0)
+            {
+                yield return new WaitForSeconds(0.5f);
+                GameData = Resources.FindObjectsOfTypeAll<DeductionGameData>();
+            }
+            UnlockCosmetics();
+        }
+
         private void DisableSpectate()
         {
             if (TargetCamera && PlayerCharacter != null)
@@ -249,14 +222,14 @@ namespace Deducto2Utility
             }
             else
             {
-                PlayerMovement = Utility.GetLocalPlayerCamera();
+                PlayerMovement = Utility.GetLocalPlayer();
                 PlayerMovement.transform.Find("CameraRoot/CameraControls/Camera").gameObject.SetActive(true);
             }
         }
 
         private void SpectateCharacter()
         {
-            PlayerMovement = Utility.GetLocalPlayerCamera();
+            PlayerMovement = Utility.GetLocalPlayer();
             Ray ray = Camera.main.ScreenPointToRay(new Vector2(Input.mousePosition.x, Input.mousePosition.y));
             RaycastHit hit;
             float distance = 100f;
