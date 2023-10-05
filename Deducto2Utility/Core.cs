@@ -67,12 +67,11 @@ namespace Deducto2Utility
 
         private Dictionary<string, WeaponData> Weapons = new Dictionary<string, WeaponData>
         {
-            { "Knife01Data", new WeaponData(0, 0) },
-            { "NailGunData", new WeaponData(0, 0) },
-            { "Pistol01Data", new WeaponData(0, 0) },
-            { "StaplerData", new WeaponData(0, 0) },
+            { "Knife01Data", new WeaponData(int.MaxValue, 0) },
+            { "NailGunData", new WeaponData(int.MaxValue, 0) },
+            { "Pistol01Data", new WeaponData(int.MaxValue, 0) },
+            { "StaplerData", new WeaponData(int.MaxValue, 0) },
         };
-
 
         /* -------- */
 
