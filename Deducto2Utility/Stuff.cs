@@ -29,5 +29,11 @@ namespace Deducto2Utility
             Melon<Core>.Logger.Msg(coloredMessage);
         }
 
+        public static void EasyErr(string message)
+        {
+            string coloredMessage = $"\u001b[{EasyLogColors.Red}m{message}\u001b[0m"; // Apply ANSI color code
+            Melon<Core>.Logger.Msg(coloredMessage);
+        }
+
     }
 }

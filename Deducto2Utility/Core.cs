@@ -249,7 +249,7 @@ namespace Deducto2Utility
                 }
                 else
                 {
-                    Debug.LogError("CameraControls not found on: " + PlayerTarget.name);
+                    EasyErr("CameraControls not found on: " + PlayerTarget.name);
                 }
             }
         }
