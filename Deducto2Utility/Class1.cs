@@ -340,9 +340,8 @@ namespace Deducto2Utility
             {
                 string[] sliderNames = { "MaxFPSSlider" };
                 SetSliderMinValue(sliderNames);
+                FunnyQuotes();
             }
-
-            FunnyQuotes();
 
         }
     }
