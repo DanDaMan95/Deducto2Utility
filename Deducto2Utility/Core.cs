@@ -211,23 +211,24 @@ namespace Deducto2Utility
 
             PlayerMovement = Utility.GetLocalPlayerCamera();
             EasyLog(@"
-                ________             .___             __         ________  ____ ___   __  .__.__  .__  __          
-                \______ \   ____   __| _/_ __   _____/  |_  ____ \_____  \|    |   \_/  |_|__|  | |__|/  |_ ___.__.
-                 |    |  \_/ __ \ / __ |  |  \_/ ___\   __\/  _ \ /  ____/|    |   /\   __\  |  | |  \   __<   |  |
-                 |    `   \  ___// /_/ |  |  /\  \___|  | (  <_> )       \|    |  /  |  | |  |  |_|  ||  |  \___  |
-                /_______  /\___  >____ |____/  \___  >__|  \____/\_______ \______/   |__| |__|____/__||__|  / ____|
-                        \/     \/     \/           \/                    \/                                 \/     
+        ________             .___             __         ________  ____ ___   __  .__.__  .__  __          
+        \______ \   ____   __| _/_ __   _____/  |_  ____ \_____  \|    |   \_/  |_|__|  | |__|/  |_ ___.__.
+        |    |  \_/ __ \ / __ |  |  \_/ ___\   __\/  _ \ /  ____/|    |   /\   __\  |  | |  \   __<   |  |
+        |    `   \  ___// /_/ |  |  /\  \___|  | (  <_> )       \|    |  /  |  | |  |  |_|  ||  |  \___  |
+        /_______  /\___  >____ |____/  \___  >__|  \____/\_______ \______/   |__| |__|____/__||__|  / ____|
+                \/     \/     \/           \/                    \/                                 \/     
                                 ", EasyLogColors.Red);
             EasyLog(@"
 
-                                    [BackQuote] -> Reset Parkour Level Changing Buttons
-                                    [Alpha4] -> Enable Wallhacks ( OwO rawr x3 )
-                                    [Keypad1] -> Unlock All Cosmetics
-                                    [Mouse0 + LeftControl] -> Spectate Player ( Click on player )
-                                    [F1] -> Reset Spectate Player
-                                    [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
-                                    [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
-                                    [Keypad7] -> OP Weapons
+                            [BackQuote] -> Reset Parkour Level Changing Buttons
+                            [Alpha4] -> Enable Wallhacks ( OwO rawr x3 )
+                            [Keypad1] -> Unlock All Cosmetics
+                            [Mouse0 + LeftControl] -> Spectate Player ( Click on player )
+                            [F1] -> Reset Spectate Player
+                            [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
+                            [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
+                            [Keypad7] -> OP Weapons
+                            [Keypad0] -> No KillCooldowns ( Why is this client sided Patrick..... )
 
 ", EasyLogColors.Green);
 
@@ -310,6 +311,13 @@ namespace Deducto2Utility
             }
         }
 
+        private void NoKillCooldowns()
+        {
+            foreach(var MatchSettings in Resources.FindObjectsOfTypeAll<MatchSettings>())
+            {
+                MatchSettings.killCooldown = 0;
+            }
+        }
 
         public override void OnUpdate()
         {
@@ -338,15 +346,7 @@ namespace Deducto2Utility
             {
                 ProcessFlying(!Flying);
             }
-            /* if (Flying)
-            {
-                if (Input.GetKeyDown(KeyCode.UpArrow))
-                {
 
-                    PlayerMovement.transform.localPosition += new Vector3(0,5,0);
-                    EasyLog($"Going up! {PlayerMovement.name}",EasyLogColors.Green);
-                }
-            } */ 
             if (Input.GetKeyDown(KeyCode.Keypad1) && !UnlockedAllCosmetics)
             {
                 EasyLog("Unlocked All Cosmetics",EasyLogColors.Green);
@@ -366,6 +366,11 @@ namespace Deducto2Utility
             {
                 GameItemData = Resources.FindObjectsOfTypeAll<ItemData>();
                 OPWeapons();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad0))
+            {
+                NoKillCooldowns();
             }
 
             if (!SetMinFPSSlider)
