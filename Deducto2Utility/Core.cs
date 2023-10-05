@@ -402,6 +402,7 @@ namespace Deducto2Utility
             if (Input.GetKeyDown(KeyCode.Keypad2))
             {
                 EarrapeItem = !EarrapeItem;
+                OPWeapons();
             }
 
         }
