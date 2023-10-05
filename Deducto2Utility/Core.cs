@@ -229,9 +229,14 @@ namespace Deducto2Utility
                     [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
                     [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
                     [Keypad7] -> OP Weapons
+                    [Keypad2] -> Earrape Marker
                     [Keypad0] -> No KillCooldowns ( Why is this client sided Patrick..... )
 
 ", EasyLogColors.Green);
+
+            EasyLog("Unlocked All Cosmetics", EasyLogColors.Green);
+            GameData = Resources.FindObjectsOfTypeAll<DeductionGameData>();
+            UnlockCosmetics();
 
         }
         
@@ -369,13 +374,6 @@ namespace Deducto2Utility
             if (Input.GetKeyDown(KeyCode.CapsLock))
             {
                 ProcessFlying(!Flying);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Keypad1) && !UnlockedAllCosmetics)
-            {
-                EasyLog("Unlocked All Cosmetics",EasyLogColors.Green);
-                GameData = Resources.FindObjectsOfTypeAll<DeductionGameData>();
-                UnlockCosmetics();
             }
             if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.LeftControl))
             {
