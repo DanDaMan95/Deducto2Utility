@@ -220,15 +220,15 @@ namespace Deducto2Utility
                                 ", EasyLogColors.Red);
             EasyLog(@"
 
-                            [BackQuote] -> Reset Parkour Level Changing Buttons
-                            [Alpha4] -> Enable Wallhacks ( OwO rawr x3 )
-                            [Keypad1] -> Unlock All Cosmetics
-                            [Mouse0 + LeftControl] -> Spectate Player ( Click on player )
-                            [F1] -> Reset Spectate Player
-                            [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
-                            [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
-                            [Keypad7] -> OP Weapons
-                            [Keypad0] -> No KillCooldowns ( Why is this client sided Patrick..... )
+                    [BackQuote] -> Reset Parkour Level Changing Buttons
+                    [Alpha4] -> Enable Wallhacks ( OwO rawr x3 )
+                    [Keypad1] -> Unlock All Cosmetics
+                    [Mouse0 + LeftControl] -> Spectate Player ( Click on player )
+                    [F1] -> Reset Spectate Player
+                    [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
+                    [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
+                    [Keypad7] -> OP Weapons
+                    [Keypad0] -> No KillCooldowns ( Why is this client sided Patrick..... )
 
 ", EasyLogColors.Green);
 
