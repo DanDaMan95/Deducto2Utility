@@ -227,6 +227,7 @@ namespace Deducto2Utility
                                     [F1] -> Reset Spectate Player
                                     [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
                                     [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
+                                    [Keypad7] -> OP Weapons
 
 ", EasyLogColors.Green);
 
