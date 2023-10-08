@@ -1,41 +1,36 @@
-﻿using Il2Cpp;
-using Il2CppEPOOutline;
-using MelonLoader;
-using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
-using Deducto2Utility;
+using MelonLoader;
 using static Deducto2Utility.Stuff;
 using static Deducto2Utility.Dicts;
+using Il2Cpp;
+using System;
+using Il2CppEPOOutline;
 
-[assembly: MelonInfo(typeof(Deducto2Utility.Core), "Deducto2Utility", "1.9.0", "Mr. Dirty")]
+[assembly: MelonInfo(typeof(Deducto2Utility.Core), "Deducto2Utility", "1.9.0", "Mr. Dirty, SomeDudeWhoOwO's")]
 namespace Deducto2Utility
 {
     public class Core : MelonMod
     {
+        private bool flying = false;
+        private bool earrapeItemEnabled = false;
+        private bool unlockCosmetics = false;
+        private bool wallhacksEnabled = false;
+        private bool noKillCooldownsEnabled = false;
+        private bool skipLoadingCooldownEnabled = false;
 
-        DeductionGameData[] GameData = null;
-        GameObject PlayerMovement = null;   /* Local Player */
-        Transform TargetCamera = null;      /* Spectator ( Your target )*/
-        GameObject PlayerCharacter = null;  /* Local Player Spectating */
-        RoleData[] GameRoleData = null;
-        ItemData[] GameItemData = null;
-        AudioClip[] GameAudioClips = null;
-        bool EarrapeItem = false;
+        private GameObject playerMovement = null;
+        private Transform targetCamera = null;
+        private GameObject playerCharacter = null;
 
-        /* DECLARES */
+        private DeductionGameData[] gameData = null;
+        private ItemData[] gameItemData = null;
+        private RoleData[] gameRoleData = null;
+        private AudioClip[] gameAudioClips = null;
 
-        private bool Flying = false;
-
-        /* -------- */
-
-        /* ONE TIME CHECKS */
-
-        bool SetMinFPSSlider = false;
-
-        /* --------------- */
+        private bool minFPSSliderSet = false;
 
         private void ProcessRooms()
         {
@@ -59,7 +54,7 @@ namespace Deducto2Utility
             }
         }
 
-        private void AddOutlinesToObjects(string[] objectNames)
+        private void ToggleOutlinesForObjects(string[] objectNames, bool enable)
         {
             GameObject[] objects = GameObject.FindObjectsOfType<GameObject>();
             foreach (var gameObject in objects)
@@ -68,9 +63,9 @@ namespace Deducto2Utility
                 if (ArrayContains(objectNames, name))
                 {
                     Outlinable existingOutlinable = gameObject.GetComponent<Outlinable>();
-                    if (existingOutlinable == null)
+                    if (existingOutlinable != null)
                     {
-                        gameObject.AddComponent<Outlinable>();
+                        existingOutlinable.enabled = enable;
                     }
                 }
             }
@@ -78,138 +73,96 @@ namespace Deducto2Utility
 
         private bool ArrayContains(string[] array, string value)
         {
-            foreach (var item in array)
-            {
-                if (item == value)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return System.Array.Exists(array, element => element == value);
         }
 
-        private void EnableOutlinesForObjects(string[] objectNames)
-        {
-            Outlinable[] outlines = GameObject.FindObjectsOfType<Outlinable>();
-            foreach (var outline in outlines)
-            {
-                string name = outline.transform.name;
-                if (ArrayContains(objectNames, name))
-                {
-                    outline.AddAllChildRenderersToRenderingList(RenderersAddingMode.SkinnedMeshRenderer);
-                    outline.enabled = true;
-                    outline.OutlineParameters.Color = Color.white;
-                }
-            }
-        }
-
-        private void MakeButtonsInteractable(string[] buttonNames)
-        {
-            Button[] buttons = GameObject.FindObjectsOfType<Button>();
-            foreach (var button in buttons)
-            {
-                string name = button.transform.name;
-                if (ArrayContains(buttonNames, name))
-                {
-                    button.interactable = true;
-                }
-            }
-        }
-
-        private void SetSliderCustomValues(string[] sliderNames)
+        private void ToggleSliderCustomValues(string[] sliderNames)
         {
             Slider[] sliders = GameObject.FindObjectsOfType<Slider>();
             foreach (var slider in sliders)
             {
                 string name = slider.transform.parent.gameObject.name;
-                if (ArrayContains(sliderNames, name))
+                if (ArrayContains(sliderNames, name) && Sliders.TryGetValue(name, out SliderInfo sliderInfo))
                 {
-                    if (Sliders.TryGetValue(name, out SliderInfo sliderInfo))
-                    {
-                        if (sliderInfo.IsMax)
-                        {
-                            slider.maxValue = sliderInfo.Value;
-                        }
-                        else
-                        {
-                            slider.minValue = sliderInfo.Value;
-                        }
-                        SetMinFPSSlider = true;
-                    }
+                    slider.maxValue = sliderInfo.IsMax ? sliderInfo.Value : slider.minValue;
+                    minFPSSliderSet = true;
                 }
             }
         }
 
-        private void UnlockCosmetics()
+        private void ToggleUnlockCosmetics()
         {
-            GameData[0].UnlockAllCosmetics = true;
-            EasyLog("UnlockAllCosmetics: true", EasyLogColors.Green);
+            if (gameData != null && gameData.Length > 0)
+            {
+                gameData[0].UnlockAllCosmetics = unlockCosmetics;
+                EasyLog($"UnlockAllCosmetics: {unlockCosmetics}", EasyLogColors.Green);
+            }
         }
 
-        private void ProcessFlying(bool Enabled)
+        private void ToggleFlying(bool enable)
         {
-            PlayerMovement = Utility.GetLocalPlayer();
-            Flying = !Flying;
-            if (Flying) { EasyLog("Flying was enabled.", EasyLogColors.Green); } else { EasyLog("Flying was disabled.", EasyLogColors.Red); }
+            playerMovement = Utility.GetLocalPlayer();
+            flying = enable;
+            //flying ? EasyLog("Flying was enabled.", EasyLogColors.Green) : EasyLog("Flying was disabled.", EasyLogColors.Red);
+            EasyLog(flying ? "Flying was enabled." : "Flying was disabled.", flying ? EasyLogColors.Green : EasyLogColors.Red);
         }
 
         [Obsolete]
         public override void OnApplicationStart()
         {
-            PlayerMovement = Utility.GetLocalPlayer();
+            playerMovement = Utility.GetLocalPlayer();
             EasyLog(@"
-        ________             .___             __         ________  ____ ___   __  .__.__  .__  __          
-        \______ \   ____   __| _/_ __   _____/  |_  ____ \_____  \|    |   \_/  |_|__|  | |__|/  |_ ___.__.
-         |    |  \_/ __ \ / __ |  |  \_/ ___\   __\/  _ \ /  ____/|    |   /\   __\  |  | |  \   __<   |  |
-         |    `   \  ___// /_/ |  |  /\  \___|  | (  <_> )       \|    |  /  |  | |  |  |_|  ||  |  \___  |
-        /_______  /\___  >____ |____/  \___  >__|  \____/\_______ \______/   |__| |__|____/__||__|  / ____|
-                \/     \/     \/           \/                    \/                                 \/     
+            ________             .___             __         ________  ____ ___   __  .__.__  .__  __          
+            \______ \   ____   __| _/_ __   _____/  |_  ____ \_____  \|    |   \_/  |_|__|  | |__|/  |_ ___.__.
+             |    |  \_/ __ \ / __ |  |  \_/ ___\   __\/  _ \ /  ____/|    |   /\   __\  |  | |  \   __<   |  |
+             |    `   \  ___// /_/ |  |  /\  \___|  | (  <_> )       \|    |  /  |  | |  |  |_|  ||  |  \___  |
+            /_______  /\___  >____ |____/  \___  >__|  \____/\_______ \______/   |__| |__|____/__||__|  / ____|
+                    \/     \/     \/           \/                    \/                                 \/     
                                 ", EasyLogColors.Red);
             EasyLog(@"
-
-                    [BackQuote] -> Reset Parkour Level Changing Buttons
-                    [Alpha4] -> Enable Wallhacks ( OwO rawr x3 )
-                    [Keypad1] -> Unlock All Cosmetics
-                    [Mouse0 + LeftControl] -> Spectate Player ( Click on player )
-                    [F1] -> Reset Spectate Player
-                    [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
-                    [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
-                    [Keypad7] -> OP Weapons
-                    [Keypad2] -> Earrape Marker
-                    [Keypad0] -> No KillCooldowns ( Why is this client sided Patrick..... )
-
-", EasyLogColors.Green);
+                [BackQuote] -> Reset Parkour Level Changing Buttons
+                [Alpha4] -> Enable Wallhacks ( OwO rawr x3 )
+                [Keypad1] -> Unlock All Cosmetics
+                [Mouse0 + LeftControl] -> Spectate Player ( Click on player )
+                [F1] -> Reset Spectate Player
+                [CapsLock] -> Fly ( NOT FINISHED. MAY NEVER BE )
+                [KeypadPlus] -> Get Room Codes ( CRASHES GAME !! DONT USE. FIXING LATER !! )
+                [Keypad7] -> OP Weapons
+                [Keypad2] -> Earrape Marker
+                [Keypad3] -> SkipLoadingCooldown ( Client sided again... ? )
+                [Keypad0] -> No KillCooldowns ( Why is this client sided Patrick..... )
+                ", EasyLogColors.Green);
 
             MelonCoroutines.Start(WaitForGameData());
         }
 
         private IEnumerator WaitForGameData()
         {
-            while (GameData == null || GameData.Length == 0)
+            while (gameData == null || gameData.Length == 0)
             {
                 yield return new WaitForSeconds(0.5f);
-                GameData = Resources.FindObjectsOfTypeAll<DeductionGameData>();
+                gameData = Resources.FindObjectsOfTypeAll<DeductionGameData>();
             }
-            UnlockCosmetics();
+            ToggleUnlockCosmetics();
         }
 
         private void DisableSpectate()
         {
-            if (TargetCamera && PlayerCharacter != null)
+            if (targetCamera && playerCharacter != null)
             {
-                TargetCamera.gameObject.SetActive(false);
-                PlayerCharacter.SetActive(true);
+                targetCamera.gameObject.SetActive(false);
+                playerCharacter.SetActive(true);
             }
             else
             {
-                PlayerMovement = Utility.GetLocalPlayer();
-                PlayerMovement.transform.Find("CameraRoot/CameraControls/Camera").gameObject.SetActive(true);
+                playerMovement = Utility.GetLocalPlayer();
+                playerMovement.transform.Find("CameraRoot/CameraControls/Camera").gameObject.SetActive(true);
             }
         }
 
         private void SpectateCharacter()
         {
-            PlayerMovement = Utility.GetLocalPlayer();
+            playerMovement = Utility.GetLocalPlayer();
             Ray ray = Camera.main.ScreenPointToRay(new Vector2(Input.mousePosition.x, Input.mousePosition.y));
             RaycastHit hit;
             float distance = 100f;
@@ -217,57 +170,55 @@ namespace Deducto2Utility
             if (Physics.Raycast(ray, out hit, distance))
             {
                 Debug.DrawLine(ray.origin, hit.point);
-                GameObject PlayerTarget = hit.collider.transform.root.gameObject;
+                GameObject playerTarget = hit.collider.transform.root.gameObject;
 
-                TargetCamera = PlayerTarget.transform.Find("CameraRoot/CameraControls/Camera");
-                PlayerCharacter = PlayerTarget.transform.Find("PlayerModelV2/CharacterRiggedV7.0").gameObject;
-                if (PlayerCharacter == null) { PlayerCharacter = PlayerTarget.transform.Find("PlayerModel(Clone)/CharacterRiggedV7.0").gameObject; }
-                if (TargetCamera != null)
+                targetCamera = playerTarget.transform.Find("CameraRoot/CameraControls/Camera");
+                playerCharacter = playerTarget.transform.Find("PlayerModelV2/CharacterRiggedV7.0").gameObject;
+                if (playerCharacter == null) { playerCharacter = playerTarget.transform.Find("PlayerModel(Clone)/CharacterRiggedV7.0").gameObject; }
+                if (targetCamera != null)
                 {
-                    TargetCamera.gameObject.SetActive(true);
-                    PlayerCharacter.SetActive(false);
+                    targetCamera.gameObject.SetActive(true);
+                    playerCharacter.SetActive(false);
                 }
                 else
                 {
-                    EasyErr("CameraControls not found on: " + PlayerTarget.name);
+                    EasyErr("CameraControls not found on: " + playerTarget.name);
                 }
             }
         }
 
-        private void OPWeapons()
+        private void ToggleOPWeapons()
         {
-            GameItemData = Resources.FindObjectsOfTypeAll<ItemData>();
-            foreach (var Item in GameItemData)
+            gameItemData = Resources.FindObjectsOfTypeAll<ItemData>();
+            foreach (var item in gameItemData)
             {
-                if (Item.name == "SketchMarkerData" && EarrapeItem)
+                if (item.name == "SketchMarkerData" && earrapeItemEnabled)
                 {
-                    // EasyLog(Item.name + " was found", EasyLogColors.Cyan);
-                    GameAudioClips = Resources.FindObjectsOfTypeAll<AudioClip>();
-                    foreach(var Audio in GameAudioClips)
+                    gameAudioClips = Resources.FindObjectsOfTypeAll<AudioClip>();
+                    foreach (var audio in gameAudioClips)
                     {
-                        // EasyLog(Audio.name + " was found",EasyLogColors.Cyan);
-                        if (Audio.name.Contains("EXPLOSION"))
+                        if (audio.name.Contains("EXPLOSION"))
                         {
-                            Item.RateOfUse = 0;
-                            Item.SoundEffectVolume = 999;
-                            Item.UseSoundEffects.Clear();
-                            Item.UseSoundEffects.Add(Audio);
-                            Item.UseSoundEffects.Add(Audio);
-                            Item.UseSoundEffects.Add(Audio);
-                            Item.UseSoundEffects.Add(Audio);
-                            Item.UseSoundEffects.Add(Audio);
-                            Item.UseSoundEffects.Add(Audio);
-                            Item.UseSoundEffects.Add(Audio);
+                            item.RateOfUse = 0;
+                            item.SoundEffectVolume = 999;
+                            item.UseSoundEffects.Clear();
+                            item.UseSoundEffects.Add(audio);
+                            item.UseSoundEffects.Add(audio);
+                            item.UseSoundEffects.Add(audio);
+                            item.UseSoundEffects.Add(audio);
+                            item.UseSoundEffects.Add(audio);
+                            item.UseSoundEffects.Add(audio);
+                            item.UseSoundEffects.Add(audio);
                         }
                     }
                 }
-                if (Weapons.ContainsKey(Item.name))
+                if (Weapons.ContainsKey(item.name))
                 {
-                    int RangeOfWeapon = Weapons[Item.name].Range;
-                    int RateOfUse = Weapons[Item.name].RateOfUse;
+                    int rangeOfWeapon = Weapons[item.name].Range;
+                    int rateOfUse = Weapons[item.name].RateOfUse;
 
-                    Item.RateOfUse = RateOfUse;
-                    Item.Range = RangeOfWeapon;
+                    item.RateOfUse = rateOfUse;
+                    item.Range = rangeOfWeapon;
                 }
                 else
                 {
@@ -276,15 +227,15 @@ namespace Deducto2Utility
             }
         }
 
-        private void FunnyQuotes()
+        private void ToggleFunnyQuotes()
         {
-            GameRoleData = Resources.FindObjectsOfTypeAll<RoleData>();
-            foreach (var Role in GameRoleData)
+            gameRoleData = Resources.FindObjectsOfTypeAll<RoleData>();
+            foreach (var role in gameRoleData)
             {
-                if (RoleStrings.ContainsKey(Role.name))
+                if (RoleStrings.ContainsKey(role.name))
                 {
-                    string GetDescription = RoleStrings[Role.name];
-                    Role.Description = GetDescription;
+                    string getDescription = RoleStrings[role.name];
+                    role.Description = getDescription;
                 }
                 else
                 {
@@ -293,20 +244,25 @@ namespace Deducto2Utility
             }
         }
 
-        private void NoKillCooldowns()
+        private void ToggleNoKillCooldowns()
         {
-            foreach(var MatchSettings in Resources.FindObjectsOfTypeAll<MatchSettings>())
+            foreach (var matchSettings in Resources.FindObjectsOfTypeAll<MatchSettings>())
             {
-                MatchSettings.killCooldown = 0;
+                matchSettings.killCooldown = noKillCooldownsEnabled ? 0 : 10; // Adjust the cooldown value as needed
+            }
+        }
+
+        private void ToggleSkipLoadingCooldown()
+        {
+            if (gameData != null && gameData.Length > 0)
+            {
+                gameData[0].SkipMatchCountdown = skipLoadingCooldownEnabled;
+                EasyLog($"SkipMatchCountdown: {skipLoadingCooldownEnabled}", EasyLogColors.Green);
             }
         }
 
         public override void OnUpdate()
         {
-
-            //string[] buttonNames = { "GivePositiveKarma" };
-            //MakeButtonsInteractable(buttonNames);
-
             if (Input.GetKeyDown(KeyCode.KeypadPlus))
             {
                 ProcessRooms();
@@ -320,18 +276,20 @@ namespace Deducto2Utility
             if (Input.GetKeyDown(KeyCode.Alpha4))
             {
                 string[] objectNames = { "CharacterRiggedV7.0", "RagdollPlayer(Clone)" };
-                AddOutlinesToObjects(objectNames);
-                EnableOutlinesForObjects(objectNames);
+                wallhacksEnabled = !wallhacksEnabled;
+                ToggleOutlinesForObjects(objectNames, wallhacksEnabled);
             }
 
             if (Input.GetKeyDown(KeyCode.CapsLock))
             {
-                ProcessFlying(!Flying);
+                ToggleFlying(!flying);
             }
+
             if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.LeftControl))
             {
                 SpectateCharacter();
             }
+
             if (Input.GetKeyDown(KeyCode.F1))
             {
                 DisableSpectate();
@@ -339,27 +297,33 @@ namespace Deducto2Utility
 
             if (Input.GetKeyDown(KeyCode.Keypad7))
             {
-                OPWeapons();
+                ToggleOPWeapons();
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad0))
             {
-                NoKillCooldowns();
+                noKillCooldownsEnabled = !noKillCooldownsEnabled;
+                ToggleNoKillCooldowns();
             }
 
-            if (!SetMinFPSSlider)
+            if (!minFPSSliderSet)
             {
                 string[] sliderNames = { "MaxFPSSlider", "Slider_01" };
-                SetSliderCustomValues(sliderNames);
-                FunnyQuotes();
+                ToggleSliderCustomValues(sliderNames);
+                ToggleFunnyQuotes();
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad2))
             {
-                EarrapeItem = !EarrapeItem;
-                OPWeapons();
+                earrapeItemEnabled = !earrapeItemEnabled;
+                ToggleOPWeapons();
             }
 
+            if (Input.GetKeyDown(KeyCode.Keypad3))
+            {
+                skipLoadingCooldownEnabled = !skipLoadingCooldownEnabled;
+                ToggleSkipLoadingCooldown();
+            }
         }
     }
 }
