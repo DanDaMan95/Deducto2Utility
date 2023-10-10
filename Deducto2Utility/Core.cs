@@ -219,9 +219,11 @@ namespace Deducto2Utility
                 {
                     int rangeOfWeapon = Weapons[item.name].Range;
                     int rateOfUse = Weapons[item.name].RateOfUse;
+                        int damage = Weapons[item.name].Damage;
 
                     item.RateOfUse = rateOfUse;
                     item.Range = rangeOfWeapon;
+                    item.Damage = damage;
                 }
                 else
                 {

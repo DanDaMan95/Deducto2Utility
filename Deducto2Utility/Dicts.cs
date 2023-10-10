@@ -9,11 +9,13 @@ namespace Deducto2Utility
     public class WeaponData
     {
         public int Range { get; set; }
+        public int Damage { get; set; }
         public int RateOfUse { get; set; }
 
-        public WeaponData(int range, int rateOfUse)
+        public WeaponData(int range,int damage, int rateOfUse)
         {
             Range = range;
+            Damage = damage;
             RateOfUse = rateOfUse;
         }
     }
@@ -33,10 +35,10 @@ namespace Deducto2Utility
 
         public static Dictionary<string, WeaponData> Weapons = new Dictionary<string, WeaponData>
         {
-            { "Knife01Data", new WeaponData(int.MaxValue, 0) },
-            { "NailGunData", new WeaponData(int.MaxValue, 0) },
-            { "Pistol01Data", new WeaponData(int.MaxValue, 0) },
-            { "StaplerData", new WeaponData(int.MaxValue, 0) },
+            { "Knife01Data", new WeaponData(int.MaxValue, int.MaxValue, 0) },
+            { "NailGunData", new WeaponData(int.MaxValue, int.MaxValue, 0) },
+            { "Pistol01Data", new WeaponData(int.MaxValue, int.MaxValue, 0) },
+            { "StaplerData", new WeaponData(int.MaxValue, int.MaxValue, 0) },
         };
 
         public static Dictionary<string, SliderInfo> Sliders = new Dictionary<string, SliderInfo>
