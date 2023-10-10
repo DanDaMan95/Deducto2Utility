@@ -42,7 +42,9 @@ namespace Deducto2Utility
         public static Dictionary<string, SliderInfo> Sliders = new Dictionary<string, SliderInfo>
         {
             { "MaxFPSSlider", new SliderInfo { Value = -1, IsMax = false } },
-            { "Slider_01", new SliderInfo { Value = 300, IsMax = true } }
+            { "Slider_01", new SliderInfo { Value = 300, IsMax = true } },
+            { "Slider", new SliderInfo { Value = 100, IsMax = true } },
+            { "LobbySizeSlider", new SliderInfo { Value = 100, IsMax = true } }
         };
     }
 }

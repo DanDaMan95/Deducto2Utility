@@ -16,7 +16,7 @@ namespace Deducto2Utility
     {
         private bool flying = false;
         private bool earrapeItemEnabled = false;
-        private bool unlockCosmetics = false;
+        private bool unlockCosmetics = true;
         private bool wallhacksEnabled = false;
         private bool noKillCooldownsEnabled = false;
         private bool skipLoadingCooldownEnabled = false;
@@ -63,9 +63,12 @@ namespace Deducto2Utility
                 if (ArrayContains(objectNames, name))
                 {
                     Outlinable existingOutlinable = gameObject.GetComponent<Outlinable>();
-                    if (existingOutlinable != null)
+                    if (existingOutlinable == null)
                     {
-                        existingOutlinable.enabled = enable;
+                        Outlinable a = gameObject.AddComponent<Outlinable>();
+                        a.AddAllChildRenderersToRenderingList(RenderersAddingMode.SkinnedMeshRenderer);
+                        a.enabled = true;
+                        a.OutlineParameters.Color = Color.white;
                     }
                 }
             }
@@ -308,7 +311,7 @@ namespace Deducto2Utility
 
             if (!minFPSSliderSet)
             {
-                string[] sliderNames = { "MaxFPSSlider", "Slider_01" };
+                string[] sliderNames = { "MaxFPSSlider", "Slider_01", "Slider", "LobbySizeSlider" };
                 ToggleSliderCustomValues(sliderNames);
                 ToggleFunnyQuotes();
             }
